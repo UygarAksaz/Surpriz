@@ -579,6 +579,62 @@
             }
         }
 
+        /* Music Button */
+        .music-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e91e63, #9c27b0);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 25px rgba(233, 30, 99, 0.4);
+            z-index: 1001;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .music-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(233, 30, 99, 0.5);
+        }
+
+        .music-btn.playing {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .music-label {
+            position: fixed;
+            bottom: 80px;
+            right: 15px;
+            background: rgba(255,255,255,0.95);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #666;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .music-btn:hover + .music-label,
+        .music-label:hover {
+            opacity: 1;
+        }
+
         .celebration-text {
             position: fixed;
             top: 50%;
@@ -662,6 +718,18 @@
                 width: 36px;
                 height: 36px;
                 font-size: 14px;
+            }
+
+            .music-btn {
+                bottom: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
+            }
+
+            .music-label {
+                display: none;
             }
         }
     </style>
@@ -789,6 +857,94 @@
     </div>
 
     <script>
+        // Happy Birthday Music with Web Audio API
+        let audioContext = null;
+        let isPlaying = false;
+        let musicTimeout = null;
+
+        // Happy Birthday melody notes (frequency in Hz)
+        const melody = [
+            // "Happy birthday to you"
+            { note: 264, duration: 0.3 }, // C4
+            { note: 264, duration: 0.3 }, // C4
+            { note: 297, duration: 0.6 }, // D4
+            { note: 264, duration: 0.6 }, // C4
+            { note: 352, duration: 0.6 }, // F4
+            { note: 330, duration: 1.0 }, // E4
+            { note: 0, duration: 0.2 },   // pause
+            
+            // "Happy birthday to you"
+            { note: 264, duration: 0.3 }, // C4
+            { note: 264, duration: 0.3 }, // C4
+            { note: 297, duration: 0.6 }, // D4
+            { note: 264, duration: 0.6 }, // C4
+            { note: 396, duration: 0.6 }, // G4
+            { note: 352, duration: 1.0 }, // F4
+            { note: 0, duration: 0.2 },   // pause
+            
+            // "Happy birthday dear..."
+            { note: 264, duration: 0.3 }, // C4
+            { note: 264, duration: 0.3 }, // C4
+            { note: 528, duration: 0.6 }, // C5
+            { note: 440, duration: 0.6 }, // A4
+            { note: 352, duration: 0.6 }, // F4
+            { note: 330, duration: 0.6 }, // E4
+            { note: 297, duration: 0.8 }, // D4
+            { note: 0, duration: 0.2 },   // pause
+            
+            // "Happy birthday to you"
+            { note: 466, duration: 0.3 }, // Bb4
+            { note: 466, duration: 0.3 }, // Bb4
+            { note: 440, duration: 0.6 }, // A4
+            { note: 352, duration: 0.6 }, // F4
+            { note: 396, duration: 0.6 }, // G4
+            { note: 352, duration: 1.2 }, // F4
+        ];
+
+        function playNote(frequency, startTime, duration) {
+            if (frequency === 0) return; // pause
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            // Envelope for smoother sound
+            gainNode.gain.setValueAtTime(0, startTime);
+            gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0.2, startTime + duration * 0.7);
+            gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+            
+            oscillator.start(startTime);
+            oscillator.stop(startTime + duration);
+        }
+
+        function playMelody() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            let currentTime = audioContext.currentTime;
+            
+            melody.forEach(({ note, duration }) => {
+                playNote(note, currentTime, duration * 0.9);
+                currentTime += duration;
+            });
+            
+            // Total duration for button state
+            const totalDuration = melody.reduce((sum, n) => sum + n.duration, 0) * 1000;
+            
+            musicTimeout = setTimeout(() => {
+                isPlaying = false;
+                document.getElementById('musicBtn').classList.remove('playing');
+                document.getElementById('musicBtn').textContent = '🎵';
+            }, totalDuration);
+        }
+
         // Theme switching
         function setTheme(theme) {
             // Remove all theme classes
@@ -850,6 +1006,11 @@
 
         function nextCard() {
             if (currentCard < totalCards - 1) {
+                // Start music on first "Devam" click
+                if (currentCard === 0 && !isPlaying) {
+                    isPlaying = true;
+                    playMelody();
+                }
                 currentCard++;
                 updateCards();
             }
