@@ -820,7 +820,7 @@
                 <div class="header">
                     <div class="subtitle">✨ Doğum Günün Kutlu Olsun ✨</div>
                     <div class="title">İyi ki Doğdun</div>
-                    <div class="name">Benim Canım Annem 💐</div>
+                    <div class="name">Bizim Canım Annemiz 💐</div>
                 </div>
 
                 <div class="divider">
@@ -864,7 +864,7 @@
 
                 <div class="wish">
                     🌟 Sağlık, mutluluk ve huzur dolu<br>
-                    nice güzel yıllar dilerim! 🌟
+                    nice güzel yıllar dileriz! 🌟
                 </div>
             </div>
 
@@ -1053,28 +1053,28 @@
             updateCards();
         }
 
-        // Balloon celebration
+        // Balloon celebration (no pop effect)
         function celebrateBalloons() {
-            const balloons = ['🎈', '🎈', '🎈', '🎈', '🎈', '🎀', '🎁', '🎉', '🎊'];
-            const colors = ['#e91e63', '#9c27b0', '#ff4081', '#ff9800', '#4caf50', '#2196f3', '#ffeb3b'];
+            const balloons = ['🎈', '🎈', '🎈', '🎈', '🎈', '🎀', '🎁', '🎉', '🎊', '💕', '🩵', '💜'];
+            const colors = ['#06b6d4', '#38bdf8', '#f472b6', '#a855f7', '#4caf50', '#ffeb3b'];
             
-            // Create balloons
-            for (let i = 0; i < 15; i++) {
+            // Create balloons that float up gently
+            for (let i = 0; i < 20; i++) {
                 setTimeout(() => {
                     const balloon = document.createElement('div');
                     balloon.className = 'balloon';
                     balloon.textContent = balloons[Math.floor(Math.random() * balloons.length)];
                     balloon.style.left = (Math.random() * 80 + 10) + '%';
-                    balloon.style.animationDuration = (Math.random() * 0.5 + 1.2) + 's';
+                    balloon.style.animationDuration = (Math.random() * 1 + 2) + 's';
                     document.body.appendChild(balloon);
 
-                    // Pop effect when balloon reaches top
+                    // Just fade out, no pop
                     setTimeout(() => {
-                        const rect = balloon.getBoundingClientRect();
-                        createPopEffect(rect.left + rect.width/2, rect.top + rect.height/2, colors);
-                        balloon.remove();
-                    }, 1200);
-                }, i * 100);
+                        balloon.style.transition = 'opacity 0.5s';
+                        balloon.style.opacity = '0';
+                        setTimeout(() => balloon.remove(), 500);
+                    }, 2500);
+                }, i * 150);
             }
 
             // Show celebration text
@@ -1083,55 +1083,27 @@
                 text.className = 'celebration-text';
                 text.textContent = '🎉 İyi ki Doğdun! 🎉';
                 document.body.appendChild(text);
-                setTimeout(() => text.remove(), 2000);
-            }, 500);
+                setTimeout(() => text.remove(), 2500);
+            }, 300);
 
             // Extra confetti burst
             setTimeout(() => {
-                for (let i = 0; i < 30; i++) {
+                for (let i = 0; i < 40; i++) {
                     setTimeout(() => {
                         const confetti = document.createElement('div');
                         confetti.className = 'confetti';
                         confetti.style.left = (Math.random() * 100) + '%';
                         confetti.style.top = '-20px';
                         confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-                        confetti.style.setProperty('--duration', (Math.random() * 2 + 2) + 's');
+                        confetti.style.setProperty('--duration', (Math.random() * 2 + 3) + 's');
                         confetti.style.setProperty('--delay', '0s');
                         confetti.style.width = (Math.random() * 10 + 8) + 'px';
                         confetti.style.height = (Math.random() * 15 + 10) + 'px';
                         document.body.appendChild(confetti);
-                        setTimeout(() => confetti.remove(), 4000);
-                    }, i * 30);
+                        setTimeout(() => confetti.remove(), 5000);
+                    }, i * 50);
                 }
-            }, 300);
-        }
-
-        function createPopEffect(x, y, colors) {
-            // Pop emoji
-            const pop = document.createElement('div');
-            pop.className = 'balloon-pop';
-            pop.textContent = '💥';
-            pop.style.left = x + 'px';
-            pop.style.top = y + 'px';
-            document.body.appendChild(pop);
-            setTimeout(() => pop.remove(), 600);
-
-            // Burst particles
-            for (let i = 0; i < 12; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'burst-particle';
-                particle.style.left = x + 'px';
-                particle.style.top = y + 'px';
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                
-                const angle = (i / 12) * Math.PI * 2;
-                const distance = Math.random() * 80 + 40;
-                particle.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
-                particle.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
-                
-                document.body.appendChild(particle);
-                setTimeout(() => particle.remove(), 800);
-            }
+            }, 200);
         }
 
         // Swipe support for mobile
